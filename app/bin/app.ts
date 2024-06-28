@@ -8,7 +8,7 @@ const config = getConfig();
 
 const app = new cdk.App();
 
-new AppStack(app, "AppStack", {
+new AppStack(app, "IotStack", {
   env: { account: config.AWS_ACCOUNT_ID, region: config.AWS_REGION },
   config,
 });

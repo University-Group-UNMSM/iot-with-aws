@@ -5,11 +5,12 @@
     "app": "bin/app.js"
   },
   "scripts": {
-    "deploy": "cdk deploy --profile iot-group",
+    "deploy": "cdk deploy --profile uni-profile",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "synth": "cdk synth"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

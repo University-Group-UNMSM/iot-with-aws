@@ -56,7 +56,7 @@ export class AppStack extends Stack {
 
     // IOT RULES
     new CfnTopicRule(this, "Rule", {
-      ruleName: createResourceName("iot-core-dynamo-rule"),
+      ruleName: "iot_stack_dynamo_rule",
       topicRulePayload: {
         sql: `SELECT * FROM '${TOPIC}'`,
         actions: [

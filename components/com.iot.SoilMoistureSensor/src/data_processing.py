@@ -11,8 +11,8 @@ from datetime import datetime
 
 def run():
   # MQTT Configuration
-  broker_address = config('BROKER_ADDRESS', cast=str)
-  broker_port = config('BROKER_PORT', cast=int)
+  broker_address = 'a2ckoa5arygoe1-ats.iot.us-east-1.amazonaws.com'
+  broker_port = 8883
 
   # Certificates
   # This folders are created by the Greengrass Core by default
@@ -71,6 +71,7 @@ def run():
   client.loop_start()
 
   while True:
+    sleep(1)
     is_soil_wet = GPIO.input(sensor_pin) == GPIO.LOW
     # Get current timestamp
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -85,10 +86,8 @@ def run():
 
     # Publish data to the output topic
     try:
-        payload = json.dumps(data)
-        client.publish(topic, payload, qos=1)
+      payload = json.dumps(data)
+      client.publish(topic, payload, qos=1)
     except Exception as e:
-        print("Error al publicar en el topic:", topic)
-        print("Error:", e)
-    else:
-        print('Failed to get reading. Try again!')
+      print("Error al publicar en el topic:", topic)
+      print("Error:", e)

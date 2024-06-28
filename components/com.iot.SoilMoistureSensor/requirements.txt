@@ -1,3 +1,4 @@
 paho-mqtt
 python-dotenv
 python-decouple
+RPi.GPIO
