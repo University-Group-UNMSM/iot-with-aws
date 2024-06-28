@@ -1,14 +1,8 @@
-import RPi.GPIO as GPIO
-import time
+import src.data_processing as data_processing
 
-GPIO.setmode(GPIO.BCM)
-sensor_pin = 21
-GPIO.setup(sensor_pin, GPIO.IN)
+def main():
+    data_processing.run()
 
-while True:
-    if GPIO.input(sensor_pin) == GPIO.LOW:
-        print("Soil is wet")
-    else:
-        print("Soil is dry")
-    time.sleep(5)
+if __name__ == "__main__":
+    main()
 

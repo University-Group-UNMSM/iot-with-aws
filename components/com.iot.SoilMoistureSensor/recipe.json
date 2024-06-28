@@ -5,7 +5,18 @@
   "ComponentDescription": "This is a simple Hello World component written in Python.",
   "ComponentPublisher": "{COMPONENT_AUTHOR}",
   "ComponentConfiguration": {
-    "DefaultConfiguration": {}
+    "DefaultConfiguration": {
+      "accessControl": {
+        "aws.greengrass.ipc.mqttproxy": {
+          "policyDescription": "Allows access to publish/subscribe to topics",
+          "operations": [
+            "aws.greengrass#PublishToIoTCore",
+            "aws.greengrass#SubscribeToIoTCore"
+          ],
+          "resources": ["soil/moisture"]
+        }
+      }
+    }
   },
   "Manifests": [
     {
@@ -13,7 +24,11 @@
         "os": "all"
       },
       "Lifecycle": {
-        "run": "python3 -u {artifacts:decompressedPath}/com.iot.SoilMoistureSensor/main.py"
+        "install": "python3 -m venv iot_venv && . iot_venv/bin/activate && python3 -m pip install -r {artifacts:decompressedPath}/com.iot.SoilMoistureSensor/requirements.txt",
+        "run": {
+          "Script": ". iot_venv/bin/activate && python3 -u {artifacts:decompressedPath}/com.iot.SoilMoistureSensor/main.py",
+          "RequiresPrivilege": "true"
+        }
       },
       "Artifacts": [
         {
