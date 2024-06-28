@@ -1,3 +1,4 @@
 /components/*/greengrass-build
 /components/deployment.json
 /components/*/zip-build
+/app/.env

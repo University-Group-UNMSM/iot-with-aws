@@ -1,6 +1,5 @@
-import { environments } from '../bin/environments';
+export const createResourceName = (name: string) => {
+  const project = "iot-stack";
 
-const { project, region, environment } = environments['dev'];
-
-export const createName = (resource: string, functionality: string) =>
-	`${project}_${resource}_${environment}_${functionality}`;
+  return `${project}-${name}`;
+};
