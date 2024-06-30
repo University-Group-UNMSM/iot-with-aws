@@ -11,6 +11,8 @@ export type AppStackProps = StackProps & {
 };
 
 export class AppStack extends Stack {
+  public tableName;
+
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
 
@@ -27,6 +29,7 @@ export class AppStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
     });
+    this.tableName = table.tableName;
 
     // DEFINE IAM ROLE FOR IOT RULES
     const actionRole = new Role(this, "ActionRole", {
