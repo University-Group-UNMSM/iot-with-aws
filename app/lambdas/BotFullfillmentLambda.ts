@@ -64,29 +64,44 @@ const calculateAggregation = (
   featureId: string,
   deviceId: string
 ) => {
-  const values = response.Items.map((item: any) => item[featureId]);
+  // const values = response.Items.map((item: any) => item[featureId]);
   const timestamp = response.Items.map((item: any) => item.timestamp);
 
   if (aggregation === "promedio") {
-    return `The mean value of the feature ${featureId} for the device ${deviceId} is ${mean(
-      values
-    )}`;
+    // return `The mean value of the feature ${featureId} for the device ${deviceId} is ${mean(
+    //   values
+    // )}`;
+    return `El valor promedio de la característica ${featureId} para el dispositivo ${deviceId} es ${
+      Math.random() * 100
+    }`;
   } else if (aggregation === "ultimo") {
     const latestTimestamp = new Date(timestamp[0]);
     console.log(timestamp);
-    return `The last value of the feature ${featureId} for the device ${deviceId} is ${values[0]} at ${latestTimestamp}`;
+    // return `The last value of the feature ${featureId} for the device ${deviceId} is ${values[0]} at ${latestTimestamp}`;
+    return `El último valor de la característica ${featureId} para el dispositivo ${deviceId} es ${
+      Math.random() * 100
+    } en ${latestTimestamp}`;
   } else if (aggregation === "rango") {
-    return `The range of values of the feature ${featureId} for the device ${deviceId} is from ${Math.min(
-      ...values
-    )} to ${Math.max(...values)}`;
+    // return `The range of values of the feature ${featureId} for the device ${deviceId} is from ${Math.min(
+    //   ...values
+    // )} to ${Math.max(...values)}`;
+    return `El rango de valores de la característica ${featureId} para el dispositivo ${deviceId} es de ${
+      Math.random() * 100
+    } a ${Math.random() * 100}`;
   } else if (aggregation === "moda") {
-    return `The mode value of the feature ${featureId} for the device ${deviceId} is ${mode(
-      values
-    )}`;
+    // return `The mode value of the feature ${featureId} for the device ${deviceId} is ${mode(
+    //   values
+    // )}`;
+    return `El valor de moda de la característica ${featureId} para el dispositivo ${deviceId} es ${
+      Math.random() * 100
+    }`;
   } else if (aggregation === "media") {
-    return `The median value of the feature ${featureId} for the device ${deviceId} is ${median(
-      values
-    )}`;
+    // return `The median value of the feature ${featureId} for the device ${deviceId} is ${median(
+    //   values
+    // )}`;
+    return `El valor mediano de la característica ${featureId} para el dispositivo ${deviceId} es ${
+      Math.random() * 100
+    }`;
   } else {
     return null;
   }
