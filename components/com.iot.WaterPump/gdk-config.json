@@ -1,0 +1,16 @@
+{
+  "gdk_version": "1.6.2",
+  "component": {
+    "com.iot.WaterPump": {
+      "author": "vasquez-gonza-zavala",
+      "version": "1.0.7",
+      "build": {
+        "build_system": "zip"
+      },
+      "publish": {
+        "bucket": "iot-group-vasquez-gonza-zavala",
+        "region": "us-east-1"
+      }
+    }
+  }
+}
