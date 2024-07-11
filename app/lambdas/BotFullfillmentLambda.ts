@@ -1,12 +1,21 @@
 import { LexV2Event } from "aws-lambda";
 import { mode, mean, median, min } from "simple-statistics";
 import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 const dynamo = new DynamoDBClient();
 
 const featuresDict: Record<string, string> = {
   temperatura: "temperature",
   humedad: "humidity",
+};
+
+type SensorItem = {
+  id: string;
+  device: string;
+  timestamp: number;
+  temperature: number;
+  humidity: number;
 };
 
 export const handler = async (event: LexV2Event) => {
@@ -54,7 +63,7 @@ const getDynamoData = async (
   );
 
   console.log("response=", response);
-  const featureId = featuresDict[feature];
+  const featureId = featuresDict[feature] as "temperature" | "humidity";
 
   const resultAggregated = calculateAggregation(
     response,
@@ -70,11 +79,12 @@ const getDynamoData = async (
 const calculateAggregation = (
   response: any,
   aggregation: string,
-  feature: string,
+  feature: "temperature" | "humidity",
   device: string
 ) => {
-  const values = response.Items.map((item: any) => item[feature]);
-  const timestamps = response.Items.map((item: any) => item.timestamp);
+  const formattedValues = unmarshall(response.Items) as SensorItem[];
+  const values = formattedValues.map((item: SensorItem) => item[feature]);
+  const timestamps = formattedValues.map((item: SensorItem) => item.timestamp);
 
   if (aggregation === "promedio") {
     return `El valor promedio de la ${feature} is ${mean(values)}`;
