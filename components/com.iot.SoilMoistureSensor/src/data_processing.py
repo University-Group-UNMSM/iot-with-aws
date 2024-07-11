@@ -1,3 +1,4 @@
+import Adafruit_DHT
 import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import paho.mqtt.enums as mqtt_enum
@@ -20,10 +21,12 @@ def run():
   thing_cert = "/greengrass/v2/thingCert.crt"
   private_key = "/greengrass/v2/privKey.key"
 
+  dht_sensor = Adafruit_DHT.DHT22
+  dht_pin = 4
   topic = "soil/moisture"
   device = "rasbperry"
 
-  # GPIO Configuration
+  # GPIO Configuration for soil moisture sensor
   GPIO.setmode(GPIO.BCM)
   sensor_pin = 21 # GPIO pin number where the sensor is connected
   GPIO.setup(sensor_pin, GPIO.IN)
@@ -73,6 +76,7 @@ def run():
   while True:
     sleep(5)
     is_soil_wet = GPIO.input(sensor_pin) == GPIO.LOW
+    humidity, temperature = Adafruit_DHT.read_retry(dht_sensor, dht_sensor)
     # Get current timestamp
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -82,8 +86,8 @@ def run():
       "device": device,
       "timestamp": timestamp,
       "isSoilWet": is_soil_wet,
-      "humidity": random.random() * 100,
-      "temperature": random.random() * 100,
+      "humidity": humidity,
+      "temperature": temperature,
     }
 
     # Publish data to the output topic
