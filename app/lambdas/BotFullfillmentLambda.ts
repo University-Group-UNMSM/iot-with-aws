@@ -19,7 +19,7 @@ export const handler = async (event: LexV2Event) => {
   console.log(`request received for feature: ${feature_name}`);
   console.log(`request received for aggregation: ${aggregation}`);
 
-  const data = getDynamoData(device_name!, feature_name!, aggregation!);
+  const data = await getDynamoData(device_name!, feature_name!, aggregation!);
   console.log(data);
 
   return close(data, "Fulfilled", {
@@ -38,9 +38,10 @@ const getDynamoData = async (
   const response = await dynamo.send(
     new QueryCommand({
       TableName: process.env.TABLE_NAME,
-      KeyConditionExpression: "device_id = :device_id",
+      IndexName: "device-index",
+      KeyConditionExpression: "device = :device",
       ExpressionAttributeValues: {
-        ":device_id": { S: deviceId },
+        ":device": { S: deviceId },
       },
     })
   );

@@ -71,7 +71,7 @@ def run():
   client.loop_start()
 
   while True:
-    sleep(1)
+    sleep(5)
     is_soil_wet = GPIO.input(sensor_pin) == GPIO.LOW
     # Get current timestamp
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -79,9 +79,11 @@ def run():
     # Crea un diccionario y asigna los valores
     data = {
       "id": str(uuid.uuid4()),
-      "timestamp": timestamp,
       "device": device,
-      "isSoilWet": is_soil_wet
+      "timestamp": timestamp,
+      "isSoilWet": is_soil_wet,
+      "humidity": random.random() * 100,
+      "temperature": random.random() * 100,
     }
 
     # Publish data to the output topic

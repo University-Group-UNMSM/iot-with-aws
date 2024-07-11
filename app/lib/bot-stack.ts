@@ -46,14 +46,15 @@ export class BotStack extends Stack {
 
     lambdaRole.addToPolicy(
       new PolicyStatement({
-        actions: ["*"],
+        actions: ["dynamodb:*"],
         resources: [
           "arn:aws:dynamodb:" +
             Stack.of(this).region +
             ":" +
             Stack.of(this).account +
             ":table/" +
-            props.tableName,
+            props.tableName +
+            "/*",
         ],
       })
     );

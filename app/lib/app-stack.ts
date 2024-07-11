@@ -21,15 +21,27 @@ export class AppStack extends Stack {
 
     // AWS DYNAMODB
     const table = new Table(this, "Table", {
-      tableName: createResourceName("sensor-data-table"),
+      tableName: createResourceName("sensor-info-table"),
       partitionKey: {
         name: "id",
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: "device",
         type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
     });
     this.tableName = table.tableName;
+
+    table.addGlobalSecondaryIndex({
+      indexName: "device-index",
+      partitionKey: {
+        name: "device",
+        type: AttributeType.STRING,
+      },
+    });
 
     // DEFINE IAM ROLE FOR IOT RULES
     const actionRole = new Role(this, "ActionRole", {
