@@ -1,8 +1,13 @@
 import { LexV2Event } from "aws-lambda";
-import { mode, mean, median } from "simple-statistics";
+import { mode, mean, median, min } from "simple-statistics";
 import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
 
 const dynamo = new DynamoDBClient();
+
+const featuresDict: Record<string, string> = {
+  temperatura: "temperature",
+  humedad: "humidity",
+};
 
 export const handler = async (event: LexV2Event) => {
   console.log("event=", event);
@@ -29,9 +34,9 @@ export const handler = async (event: LexV2Event) => {
 };
 
 const getDynamoData = async (
-  deviceId: string,
-  featureId: string,
-  aggregationId: string
+  device: string,
+  feature: string,
+  aggregation: string
 ) => {
   console.log("getDynamoData");
 
@@ -41,18 +46,21 @@ const getDynamoData = async (
       IndexName: "device-index",
       KeyConditionExpression: "device = :device",
       ExpressionAttributeValues: {
-        ":device": { S: deviceId },
+        ":device": { S: device },
       },
+      ScanIndexForward: false,
+      Limit: 600,
     })
   );
 
   console.log("response=", response);
+  const featureId = featuresDict[feature];
 
   const resultAggregated = calculateAggregation(
     response,
-    aggregationId,
+    aggregation,
     featureId,
-    deviceId
+    device
   );
   console.log(resultAggregated);
 
@@ -62,47 +70,40 @@ const getDynamoData = async (
 const calculateAggregation = (
   response: any,
   aggregation: string,
-  featureId: string,
-  deviceId: string
+  feature: string,
+  device: string
 ) => {
-  // const values = response.Items.map((item: any) => item[featureId]);
-  const timestamp = response.Items.map((item: any) => item.timestamp);
+  const values = response.Items.map((item: any) => item[feature]);
+  const timestamps = response.Items.map((item: any) => item.timestamp);
 
   if (aggregation === "promedio") {
-    // return `The mean value of the feature ${featureId} for the device ${deviceId} is ${mean(
-    //   values
-    // )}`;
-    return `El valor promedio de la característica ${featureId} para el dispositivo ${deviceId} es ${
-      Math.random() * 100
-    }`;
+    return `El valor promedio de la ${feature} is ${mean(values)}`;
+    // return `El valor promedio de la característica ${featureId} para el dispositivo ${deviceId} es ${
+    //   Math.random() * 100
+    // }`;
   } else if (aggregation === "ultimo") {
-    const latestTimestamp = new Date(timestamp[0]);
-    console.log(timestamp);
+    const lastTimestamp = timestamps[0];
+    const lastDate = new Date(lastTimestamp * 1000);
+    console.log(lastDate);
     // return `The last value of the feature ${featureId} for the device ${deviceId} is ${values[0]} at ${latestTimestamp}`;
-    return `El último valor de la característica ${featureId} para el dispositivo ${deviceId} es ${
-      Math.random() * 100
-    } en ${latestTimestamp}`;
+    return `El último valor de la característica ${feature} es ${values[0]} en ${lastDate}`;
   } else if (aggregation === "rango") {
     // return `The range of values of the feature ${featureId} for the device ${deviceId} is from ${Math.min(
     //   ...values
     // )} to ${Math.max(...values)}`;
-    return `El rango de valores de la característica ${featureId} para el dispositivo ${deviceId} es de ${
-      Math.random() * 100
-    } a ${Math.random() * 100}`;
+    return `El rango de valores de la característica ${feature} es de ${Math.min(
+      ...values
+    )} a ${Math.max(...values)}`;
   } else if (aggregation === "moda") {
     // return `The mode value of the feature ${featureId} for the device ${deviceId} is ${mode(
     //   values
     // )}`;
-    return `El valor de moda de la característica ${featureId} para el dispositivo ${deviceId} es ${
-      Math.random() * 100
-    }`;
-  } else if (aggregation === "media") {
+    return `El valor de moda de la ${feature} es ${mode(values)}`;
+  } else if (aggregation === "mediana") {
     // return `The median value of the feature ${featureId} for the device ${deviceId} is ${median(
     //   values
     // )}`;
-    return `El valor mediano de la característica ${featureId} para el dispositivo ${deviceId} es ${
-      Math.random() * 100
-    }`;
+    return `La mediana de la ${feature} es ${median(values)}`;
   } else {
     return null;
   }
