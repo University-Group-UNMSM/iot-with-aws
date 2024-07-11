@@ -1,6 +1,10 @@
 import { LexV2Event } from "aws-lambda";
 import { mode, mean, median, min } from "simple-statistics";
-import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  QueryCommand,
+  QueryCommandOutput,
+} from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 const dynamo = new DynamoDBClient();
@@ -13,7 +17,7 @@ const featuresDict: Record<string, string> = {
 type SensorItem = {
   id: string;
   device: string;
-  timestamp: number;
+  timestamp: string;
   temperature: number;
   humidity: number;
 };
@@ -77,14 +81,21 @@ const getDynamoData = async (
 };
 
 const calculateAggregation = (
-  response: any,
+  response: QueryCommandOutput,
   aggregation: string,
   feature: "temperature" | "humidity",
   device: string
 ) => {
-  const formattedValues = unmarshall(response.Items) as SensorItem[];
-  const values = formattedValues.map((item: SensorItem) => item[feature]);
+  const formattedValues = response.Items?.map((item) =>
+    unmarshall(item)
+  ) as SensorItem[];
+  const rawValues = formattedValues.map((item: SensorItem) => item[feature]);
+  const values = rawValues.filter((value) => value !== undefined);
   const timestamps = formattedValues.map((item: SensorItem) => item.timestamp);
+
+  console.log(formattedValues);
+  console.log(values);
+  console.log(timestamps);
 
   if (aggregation === "promedio") {
     return `El valor promedio de la ${feature} is ${mean(values)}`;
@@ -93,10 +104,12 @@ const calculateAggregation = (
     // }`;
   } else if (aggregation === "ultimo") {
     const lastTimestamp = timestamps[0];
-    const lastDate = new Date(lastTimestamp * 1000);
+    const lastDate = getFormattedDate(lastTimestamp);
     console.log(lastDate);
     // return `The last value of the feature ${featureId} for the device ${deviceId} is ${values[0]} at ${latestTimestamp}`;
-    return `El último valor de la característica ${feature} es ${values[0]} en ${lastDate}`;
+    return `El último valor de la característica ${feature} es ${
+      values[0]
+    } en ${lastDate.toLocaleString()}`;
   } else if (aggregation === "rango") {
     // return `The range of values of the feature ${featureId} for the device ${deviceId} is from ${Math.min(
     //   ...values
@@ -143,4 +156,15 @@ const close = (event_data: any, fulfillment_state: string, message: any) => {
   );
 
   return response;
+};
+
+const getFormattedDate = (timestamp: string) => {
+  let year = parseInt(timestamp.substring(0, 4), 10);
+  let month = parseInt(timestamp.substring(4, 6), 10) - 1; // Los meses en JavaScript son 0-indexados
+  let day = parseInt(timestamp.substring(6, 8), 10);
+  let hours = parseInt(timestamp.substring(8, 10), 10);
+  let minutes = parseInt(timestamp.substring(10, 12), 10);
+  let seconds = parseInt(timestamp.substring(12, 14), 10);
+
+  return new Date(year, month, day, hours, minutes, seconds);
 };

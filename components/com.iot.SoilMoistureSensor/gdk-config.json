@@ -3,7 +3,7 @@
   "component": {
     "com.iot.SoilMoistureSensor": {
       "author": "vasquez-gonza-zavala",
-      "version": "1.2.0",
+      "version": "1.2.3",
       "build": {
         "build_system": "zip"
       },

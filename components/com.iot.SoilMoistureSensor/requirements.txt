@@ -2,4 +2,4 @@ paho-mqtt
 python-dotenv
 python-decouple
 RPi.GPIO
-Adafruit_DHT
+adafruit-circuitpython-dht

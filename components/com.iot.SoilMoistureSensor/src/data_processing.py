@@ -1,4 +1,5 @@
-import Adafruit_DHT
+import adafruit_dht
+import board
 import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import paho.mqtt.enums as mqtt_enum
@@ -21,8 +22,7 @@ def run():
   thing_cert = "/greengrass/v2/thingCert.crt"
   private_key = "/greengrass/v2/privKey.key"
 
-  dht_sensor = Adafruit_DHT.DHT22
-  dht_pin = 4
+  dht_sensor = adafruit_dht.DHT22(board.D4)
   topic = "soil/moisture"
   device = "rasbperry"
 
@@ -43,6 +43,7 @@ def run():
 
   # Create MQTT client instance
   client_id = f'python-mqtt-{random.randint(0, 1000)}'
+  print(f"Client ID: {client_id}")
   client = mqtt.Client(callback_api_version=mqtt_enum.CallbackAPIVersion.VERSION1, client_id=client_id)
 
   # Set callback functions
@@ -76,24 +77,30 @@ def run():
   while True:
     sleep(5)
     is_soil_wet = GPIO.input(sensor_pin) == GPIO.LOW
-    humidity, temperature = Adafruit_DHT.read_retry(dht_sensor, dht_sensor)
+    temperature = dht_sensor.temperature
+    humidity = dht_sensor.humidity
     # Get current timestamp
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 
-    # Crea un diccionario y asigna los valores
-    data = {
-      "id": str(uuid.uuid4()),
-      "device": device,
-      "timestamp": timestamp,
-      "isSoilWet": is_soil_wet,
-      "humidity": humidity,
-      "temperature": temperature,
-    }
+    if humidity is not None and temperature is not None:
+      print('Temp={0:0.1f}°C  Humidity={1:0.1f}%'.format(temperature, humidity))
 
-    # Publish data to the output topic
-    try:
-      payload = json.dumps(data)
-      client.publish(topic, payload, qos=1)
-    except Exception as e:
-      print("Error al publicar en el topic:", topic)
-      print("Error:", e)
+      # Crea un diccionario y asigna los valores
+      data = {
+        "id": str(uuid.uuid4()),
+        "device": device,
+        "timestamp": timestamp,
+        "isSoilWet": is_soil_wet,
+        "humidity": humidity,
+        "temperature": temperature,
+      }
+
+      # Publish data to the output topic
+      try:
+        payload = json.dumps(data)
+        client.publish(topic, payload, qos=1)
+      except Exception as e:
+        print("Error al publicar en el topic:", topic)
+        print("Error:", e)
+    else:
+      print('Failed to get reading. Try again!')
