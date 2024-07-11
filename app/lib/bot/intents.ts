@@ -37,7 +37,10 @@ const getDataIntent = (
       { utterance: "Quiero consultar la informacion de mi {device}" },
       { utterance: "Mi dispositivo es {device}" },
       { utterance: "Mi dispositivo es {device} y quiero saber la {feature}" },
-      { utterance: "Mi dispositivo es {device} y quiero saber la {feature} en {aggregation}" },
+      {
+        utterance:
+          "Mi dispositivo es {device} y quiero saber la {feature} en {aggregation}",
+      },
     ],
     slots: [
       {
@@ -70,7 +73,8 @@ const getDataIntent = (
               {
                 message: {
                   plainTextMessage: {
-                    value: "¿Cuál es la característica que deseas consultar (temperatura, humedad)?",
+                    value:
+                      "¿Cuál es la característica que deseas consultar (temperatura, humedad)?",
                   },
                 },
               },
@@ -122,6 +126,32 @@ const getDataIntent = (
   };
 };
 
+const irrigationIntent = {
+  name: "Irrigation",
+  sampleUtterances: [
+    { utterance: "Quiero regar mi planta" },
+    { utterance: "Riego" },
+    { utterance: "Regar" },
+    { utterance: "Deseo regar mi planta" },
+  ],
+  intentClosingSetting: {
+    closingResponse: {
+      messageGroupsList: [
+        {
+          message: {
+            plainTextMessage: {
+              value: "¡Regando la planta!",
+            },
+          },
+        },
+      ],
+    },
+  },
+  fulfillmentCodeHook: {
+    enabled: true,
+  },
+};
+
 const fallbackIntent = {
   name: "FallbackIntent",
   description: "Default intent when no other intent matches",
@@ -142,4 +172,4 @@ const fallbackIntent = {
   },
 };
 
-export { greetingIntent, getDataIntent, fallbackIntent };
+export { greetingIntent, getDataIntent, fallbackIntent, irrigationIntent };

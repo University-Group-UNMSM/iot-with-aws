@@ -6,8 +6,10 @@ import {
   QueryCommandOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 
 const dynamo = new DynamoDBClient();
+const lambda = new LambdaClient();
 
 const featuresDict: Record<string, string> = {
   temperatura: "temperature",
@@ -24,6 +26,34 @@ type SensorItem = {
 
 export const handler = async (event: LexV2Event) => {
   console.log("event=", event);
+
+  if (event.sessionState.intent.name == "Irrigation") {
+    await lambda.send(
+      new InvokeCommand({
+        FunctionName: "iot-plant-activate-irrigation",
+        Payload: JSON.stringify({ duration: 3 }),
+        InvocationType: "Event",
+      })
+    );
+
+    return {
+      sessionState: {
+        dialogAction: {
+          type: "Close",
+        },
+        intent: {
+          name: "Irrigation",
+          state: "Fulfilled",
+        },
+      },
+      messages: [
+        {
+          contentType: "PlainText",
+          content: "!Regando planta!",
+        },
+      ],
+    };
+  }
 
   const slots = event.interpretations[0].intent.slots;
   console.log("slots=", slots);

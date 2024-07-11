@@ -26,18 +26,6 @@ export class BotStack extends Stack {
       assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
     });
 
-    const botLambda = new NodejsFunction(this, "BotFullfillmentLambda", {
-      runtime: Runtime.NODEJS_20_X,
-      functionName: "iot-plant-bot-fulfillment",
-      memorySize: 256,
-      timeout: Duration.seconds(10),
-      logRetention: RetentionDays.ONE_MONTH,
-      role: lambdaRole,
-      entry: path.resolve("lambdas/BotFullfillmentLambda.ts"),
-      environment: {
-        TABLE_NAME: props.tableName,
-      },
-    });
     lambdaRole.addManagedPolicy(
       ManagedPolicy.fromAwsManagedPolicyName(
         "service-role/AWSLambdaBasicExecutionRole"
@@ -58,6 +46,64 @@ export class BotStack extends Stack {
         ],
       })
     );
+
+    const botLambda = new NodejsFunction(this, "BotFullfillmentLambda", {
+      runtime: Runtime.NODEJS_20_X,
+      functionName: "iot-plant-bot-fulfillment",
+      memorySize: 256,
+      timeout: Duration.seconds(10),
+      logRetention: RetentionDays.ONE_MONTH,
+      role: lambdaRole,
+      entry: path.resolve("lambdas/BotFullfillmentLambda.ts"),
+      environment: {
+        TABLE_NAME: props.tableName,
+      },
+    });
+
+    // Role for ActivateIrrigationLambda
+    const irrigationLambdaRole = new Role(
+      this,
+      "ActivateIrrigationLambdaRole",
+      {
+        assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+      }
+    );
+
+    irrigationLambdaRole.addManagedPolicy(
+      ManagedPolicy.fromAwsManagedPolicyName(
+        "service-role/AWSLambdaBasicExecutionRole"
+      )
+    );
+
+    // grant acces to publish to mqtt topic
+    irrigationLambdaRole.addToPolicy(
+      new PolicyStatement({
+        actions: ["iot:Publish"],
+        resources: [
+          "arn:aws:iot:" +
+            Stack.of(this).region +
+            ":" +
+            Stack.of(this).account +
+            ":topic/relay/activate",
+        ],
+      })
+    );
+
+    const activateIrrigationLambda = new NodejsFunction(
+      this,
+      "ActivateIrrigationLambda",
+      {
+        runtime: Runtime.NODEJS_20_X,
+        functionName: "iot-plant-activate-irrigation",
+        memorySize: 128,
+        timeout: Duration.seconds(30),
+        logRetention: RetentionDays.ONE_MONTH,
+        role: irrigationLambdaRole,
+        entry: path.resolve("lambdas/ActivateIrrigation.ts"),
+      }
+    );
+
+    activateIrrigationLambda.grantInvoke(botLambda);
 
     const botRole = new Role(this, "BotRole", {
       assumedBy: new ServicePrincipal("lex.amazonaws.com"),
@@ -100,6 +146,7 @@ export class BotStack extends Stack {
               slots.featureTypeName.name,
               slots.aggregationTypeName.name
             ),
+            intents.irrigationIntent,
             intents.fallbackIntent,
           ],
         },
