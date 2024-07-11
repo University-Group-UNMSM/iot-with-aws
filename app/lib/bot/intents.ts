@@ -1,8 +1,12 @@
 const greetingIntent = {
   name: "Greetings",
   sampleUtterances: [
+    { utterance: "Hey" },
+    { utterance: "Hey!" },
     { utterance: "Hi" },
+    { utterance: "Hi!" },
     { utterance: "Hola" },
+    { utterance: "Hola!" },
     { utterance: "Hello!" },
     { utterance: "Hello" },
   ],
@@ -12,7 +16,7 @@ const greetingIntent = {
         {
           message: {
             plainTextMessage: {
-              value: "Hola, buen dia, como puedo ayudarte hoy?",
+              value: "¡Hola! ¿En qué puedo ayudarte?",
             },
           },
         },
@@ -32,6 +36,8 @@ const getDataIntent = (
       { utterance: "Quiero saber informacion sobre mi dispositivo" },
       { utterance: "Quiero consultar la informacion de mi {device}" },
       { utterance: "Mi dispositivo es {device}" },
+      { utterance: "Mi dispositivo es {device} y quiero saber la {feature}" },
+      { utterance: "Mi dispositivo es {device} y quiero saber la {feature} en {aggregation}" },
     ],
     slots: [
       {
@@ -44,7 +50,7 @@ const getDataIntent = (
               {
                 message: {
                   plainTextMessage: {
-                    value: "Cual es tu dispositivo?",
+                    value: "¿Cuál es el nombre de tu dispositivo?",
                   },
                 },
               },
@@ -64,7 +70,7 @@ const getDataIntent = (
               {
                 message: {
                   plainTextMessage: {
-                    value: "Cual es la caracteristica que deseas consultar?",
+                    value: "¿Cuál es la característica que deseas consultar (temperatura, humedad)?",
                   },
                 },
               },
@@ -85,7 +91,7 @@ const getDataIntent = (
                 message: {
                   plainTextMessage: {
                     value:
-                      "Que tipo de informacion deseas obtener? (promedio, minimo, maximo, ultima medicion)",
+                      "¿Qué tipo de información deseas obtener? (promedio, ultimo, rango, moda, mediana)",
                   },
                 },
               },
@@ -127,7 +133,7 @@ const fallbackIntent = {
           message: {
             plainTextMessage: {
               value:
-                "Disculpa, no entendi tu solicitud. Por favor intenta de nuevo.",
+                "Disculpa, no entendí tu solicitud. Por favor intenta de nuevo.",
             },
           },
         },
